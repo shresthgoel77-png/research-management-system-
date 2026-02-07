@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BVCOE Research Management System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' },
+                        blue: { 500: '#3b82f6', 600: '#2563eb' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- Global Utilities --- */
+        body { background-color: #020617; color: #f8fafc; overflow-x: hidden; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .text-glow { text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+
+        /* --- NEW MODERN FLOATING GALLERY STYLES --- */
+        
+        /* 1. Container & Scroll Logic */
+        .cinematic-gallery {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 4rem 2rem;
+            min-height: 500px;
+            overflow-x: visible; /* Allow hover to spill over */
+        }
+
+        /* 2. The Card Item */
+        .gallery-item {
+            position: relative;
+            width: 260px;
+            height: 380px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smooth spring-like easing */
+            will-change: transform;
+            /* Default Styling */
+            filter: grayscale(20%) brightness(0.9);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* 3. The Image Inside */
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+
+        /* 4. Floating Animation (Keyframes) */
+        @keyframes subtleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Apply Float to NON-hovered items only (pauses on interaction) */
+        .cinematic-gallery:not(:hover) .gallery-item {
+            animation: subtleFloat 6s ease-in-out infinite;
+        }
+
+        /* 5. HOVER INTERACTIONS (The "Cinematic" Effect) */
+        
+        /* When hovering the container: dim all items slightly */
+        .cinematic-gallery:hover .gallery-item {
+            opacity: 0.4;
+            filter: grayscale(80%) blur(1px);
+        }
+
+        /* When hovering a SPECIFIC item: */
+        .cinematic-gallery .gallery-item:hover {
+            opacity: 1;
+            filter: grayscale(0%) brightness(1.1); /* Brighten active */
+            transform: scale(1.25) translateY(-10px); /* Scale Up & Lift */
+            z-index: 50; /* Bring to front */
+            box-shadow: 0 30px 60px -10px rgba(37, 99, 235, 0.4); /* Blue Glow */
+        }
+        
+        .cinematic-gallery .gallery-item:hover img {
+            transform: scale(1.1); /* Inner image subtle zoom */
+        }
+
+        /* 6. Neighbor Shift using :has() (Modern Browsers) */
+        /* Shift Left Sibling to the Left */
+        .cinematic-gallery .gallery-item:has(+ .gallery-item:hover) {
+            transform: translateX(-15px) scale(0.95);
+        }
+        
+        /* Shift Right Sibling to the Right */
+        .cinematic-gallery .gallery-item:hover + .gallery-item {
+            transform: translateX(15px) scale(0.95);
+        }
+
+        /* 7. Overlay Text */
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 1023px) {
+            .cinematic-gallery {
+                justify-content: flex-start;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                padding: 2rem;
+                gap: 1rem;
+            }
+            .cinematic-gallery::-webkit-scrollbar { display: none; }
+            
+            .gallery-item {
+                flex: 0 0 260px; /* Fixed width prevents shrinking */
+                scroll-snap-align: center;
+                animation: none !important; /* Disable float on mobile for performance */
+                transform: none !important;
+            }
+            
+            /* Disable complex hover effects on touch */
+            .cinematic-gallery:hover .gallery-item { opacity: 1; filter: none; }
+            .cinematic-gallery .gallery-item:hover { transform: none; }
+            .gallery-overlay { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-600 selection:text-white">
+
+    <nav class="fixed top-0 w-full z-50 glass transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="https://bvicam.in/Content/ForntEnd/images/logo.png" alt="BV Logo" class="h-16 w-auto object-contain brightness-110">
+            </div>
+            <div class="hidden md:block font-medium text-slate-300 tracking-wide">
+                Research Management System
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img 
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFqLO5urGZkSqxscTFdkPQYsBvNbls398LIw&s" 
+                alt="Campus Background" 
+                class="w-full h-full object-cover opacity-100 brightness-110 contrast-110 saturate-105"
+            >
+            <div class="absolute inset-0 bg-slate-950/60 gradient-overlay"></div>
+        </div>
+
+        <div id="hero-search" class="relative z-10 w-full max-w-2xl px-4 opacity-0 translate-y-5">
+            <div class="bg-slate-900/80 border border-slate-700 backdrop-blur-md rounded-full shadow-2xl p-2 flex items-center gap-3 ring-1 ring-white/10">
+                <div class="pl-4 text-slate-400"><i data-lucide="search" class="w-6 h-6"></i></div>
+                <input type="text" placeholder="Search professors, publications, research projects..." class="w-full bg-transparent border-none outline-none text-lg py-3 text-white placeholder:text-slate-500">
+                <button class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-medium transition-colors duration-200 shadow-lg shadow-blue-900/50">Search</button>
+            </div>
+            <p class="text-slate-300 text-center mt-6 text-sm font-light tracking-wider">EXPLORE THE ACADEMIC EXCELLENCE</p>
+        </div>
+    </header>
+
+    <aside class="fixed right-4 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-4">
+        <a href="#" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-lg">
+            <i data-lucide="instagram" class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
+        </a>
+        <a href="#" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-lg">
+            <i data-lucide="linkedin" class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
+        </a>
+        <a href="#" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-lg">
+            <i data-lucide="twitter" class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
+        </a>
+    </aside>
+
+    <section id="stats-section" class="py-24 bg-slate-950 relative border-b border-slate-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-12 text-center">
+                <div class="stat-item space-y-2 group"><h3 class="text-5xl font-bold text-white tracking-tight group-hover:text-blue-500 transition-colors duration-300"><span class="counter" data-target="120">0</span>+</h3><p class="text-slate-500 font-medium uppercase text-xs tracking-widest">Subjects Taught</p></div>
+                <div class="stat-item space-y-2 group"><h3 class="text-5xl font-bold text-white tracking-tight group-hover:text-blue-500 transition-colors duration-300"><span class="counter" data-target="85">0</span></h3><p class="text-slate-500 font-medium uppercase text-xs tracking-widest">Professors Allotted</p></div>
+                <div class="stat-item space-y-2 group"><h3 class="text-5xl font-bold text-white tracking-tight group-hover:text-blue-500 transition-colors duration-300"><span class="counter" data-target="200">0</span>+</h3><p class="text-slate-500 font-medium uppercase text-xs tracking-widest">Total Professors</p></div>
+                <div class="stat-item space-y-2 group"><h3 class="text-5xl font-bold text-white tracking-tight group-hover:text-blue-500 transition-colors duration-300"><span class="counter" data-target="450">0</span>+</h3><p class="text-slate-500 font-medium uppercase text-xs tracking-widest">Research Papers</p></div>
+                <div class="stat-item space-y-2 group"><h3 class="text-5xl font-bold text-white tracking-tight group-hover:text-blue-500 transition-colors duration-300"><span class="counter" data-target="310">0</span></h3><p class="text-slate-500 font-medium uppercase text-xs tracking-widest">Publications</p></div>
+                <div class="stat-item space-y-2 group"><h3 class="text-5xl font-bold text-white tracking-tight group-hover:text-blue-500 transition-colors duration-300"><span class="counter" data-target="45">0</span></h3><p class="text-slate-500 font-medium uppercase text-xs tracking-widest">Active Projects</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-slate-900 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 mb-4 text-center relative z-10">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">Research Gallery</h2>
+            <p class="text-slate-400 text-sm tracking-wide uppercase">Discover Innovation</p>
+        </div>
+
+        <div class="w-full overflow-hidden">
+            <div class="cinematic-gallery">
+                
+                <div class="gallery-item" style="animation-delay: 0s;">
+                    <img src="images/img3.jpeg" alt="Chemistry">
+                    <div class="gallery-overlay">
+                        <p class="text-blue-400 text-xs font-bold uppercase">Labs</p>
+                        <h4 class="text-white font-medium text-lg">Molecular Analysis</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item" style="animation-delay: 1.2s;">
+                    <img src="images/img4.jpeg" alt="Robotics">
+                    <div class="gallery-overlay">
+                        <p class="text-blue-400 text-xs font-bold uppercase">Tech</p>
+                        <h4 class="text-white font-medium text-lg">AI & Automation</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item" style="animation-delay: 2.5s;">
+                    <img src="images/img5.jpeg" alt="Collaboration">
+                    <div class="gallery-overlay">
+                        <p class="text-blue-400 text-xs font-bold uppercase">Community</p>
+                        <h4 class="text-white font-medium text-lg">Student Growth</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item" style="animation-delay: 0.8s;">
+                    <img src="images/img6.jpeg" alt="Genetics">
+                    <div class="gallery-overlay">
+                        <p class="text-blue-400 text-xs font-bold uppercase">Biology</p>
+                        <h4 class="text-white font-medium text-lg">Genome Mapping</h4>
+                    </div>
+                </div>
+
+                <div class="gallery-item" style="animation-delay: 2.0s;">
+                    <img src="images/img7.jpeg" alt="Data">
+                    <div class="gallery-overlay">
+                        <p class="text-blue-400 text-xs font-bold uppercase">Analytics</p>
+                        <h4 class="text-white font-medium text-lg">Big Data Systems</h4>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-32 bg-slate-950 overflow-hidden relative border-t border-slate-900">
+        <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-blue-900/10 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
+            <div class="order-2 lg:order-1 space-y-8">
+                <div class="inline-block px-4 py-1 rounded-full bg-blue-900/30 border border-blue-500/30 text-blue-400 text-sm font-semibold tracking-wide">About Us</div>
+                <h2 class="text-4xl md:text-5xl font-bold text-white leading-tight">Fostering a Culture of <br/><span class="text-blue-500 text-glow">Innovation</span></h2>
+                <p class="text-lg text-slate-400 leading-relaxed max-w-lg">Our vision is to foster a culture of research and innovation. We are committed to empowering our professors and students to publish groundbreaking papers and manage projects efficiently.</p>
+                <button class="flex items-center gap-2 text-blue-400 font-semibold hover:gap-4 transition-all hover:text-blue-300">Read our Vision <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+            </div>
+            <div class="order-1 lg:order-2 relative h-[500px] w-full flex items-center justify-center">
+                <div class="absolute w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
+                <div class="floating-image absolute top-0 right-10 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-700 rotate-6 bg-slate-800"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover opacity-90"></div>
+                <div class="floating-image-reverse absolute bottom-10 left-10 w-48 h-64 rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-700 -rotate-6 z-10 bg-slate-800"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover opacity-90"></div>
+                <div class="floating-image absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full overflow-hidden shadow-2xl border-2 border-slate-700 z-20 bg-slate-800"><img src="https://images.unsplash.com/photo-1544526226-d4568090d6e4?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover opacity-90"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-32 bg-slate-900 overflow-hidden border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-6 space-y-24">
+            <h2 class="text-center text-3xl font-bold text-white mb-16">Special Thanks</h2>
+            <div class="thanks-row flex flex-col md:flex-row items-center gap-12 justify-center opacity-0 -translate-x-12" id="thanks-row-1">
+                <div class="w-48 h-48 rounded-full overflow-hidden shadow-2xl shadow-blue-900/20 border-4 border-slate-800 flex-shrink-0"><img src="images/img1.jpeg" class="w-full h-full object-cover"></div>
+                <div class="text-center md:text-left space-y-2"><h3 class="text-2xl font-bold text-white">Dr. Patangrao Kadam</h3><p class="text-blue-500 font-medium">Project Guide</p><p class="text-slate-400 text-sm max-w-xs">For invaluable guidance and unwavering support throughout the research lifecycle.</p></div>
+            </div>
+            <div class="thanks-row flex flex-col md:flex-row-reverse items-center gap-12 justify-center opacity-0 translate-x-12" id="thanks-row-2">
+                <div class="w-48 h-48 rounded-full overflow-hidden shadow-2xl shadow-blue-900/20 border-4 border-slate-800 flex-shrink-0"><img src="images/img2.jpeg" class="w-full h-full object-cover"></div>
+                <div class="text-center md:text-right space-y-2"><h3 class="text-2xl font-bold text-white">Dr. Dharmender Saini</h3><p class="text-blue-500 font-medium">Technical Mentor</p><p class="text-slate-400 text-sm max-w-xs">For technical expertise and structural architecture advice on the platform.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black text-slate-500 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2"><div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs">BV</div><p class="text-sm">© 2026 BVCOE Research Management System.</p></div>
+            <div class="flex items-center gap-6 text-sm font-medium">
+                <a href="mailto:research@bvcoe.ac.in" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4"></i> research@bvcoe.ac.in</a>
+                <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+                <a href="tel:+919876543210" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> +91 98765 43210</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Search Animation
+        gsap.to("#hero-search", { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.5 });
+
+        // Stats Counter
+        const stats = document.querySelectorAll(".counter");
+        stats.forEach(stat => {
+            let target = +stat.getAttribute("data-target");
+            ScrollTrigger.create({
+                trigger: "#stats-section",
+                start: "top 80%", 
+                once: true,
+                onEnter: () => {
+                    gsap.to(stat, {
+                        innerText: target, duration: 2, snap: { innerText: 1 }, ease: "power2.out",
+                        onUpdate: function() { stat.innerText = Math.ceil(this.targets()[0].innerText); }
+                    });
+                }
+            });
+        });
+
+        // About Us Images
+        gsap.to(".floating-image", { y: -20, rotation: 2, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        gsap.to(".floating-image-reverse", { y: 20, rotation: -2, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+        // Thanks Section
+        gsap.to("#thanks-row-1", { scrollTrigger: { trigger: "#thanks-row-1", start: "top 85%", toggleActions: "play none none reverse" }, x: 0, opacity: 1, duration: 1, ease: "power3.out" });
+        gsap.to("#thanks-row-2", { scrollTrigger: { trigger: "#thanks-row-2", start: "top 85%", toggleActions: "play none none reverse" }, x: 0, opacity: 1, duration: 1, ease: "power3.out" });
+    </script>
+</body>
+</html>
