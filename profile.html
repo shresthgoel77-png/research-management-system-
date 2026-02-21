@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Professor Profile</title>
+</head>
+<body>
+
+<h2 id="profName"></h2>
+<p><strong>Department:</strong> <span id="department"></span></p>
+<p><strong>Publications:</strong> <span id="publications"></span></p>
+<p><strong>Research Papers:</strong> <span id="researchPapers"></span></p>
+<p><strong>Experience:</strong> <span id="experience"></span></p>
+<p><strong>Education:</strong> <span id="education"></span></p>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2-HPP3PusL3Tu7q1UIxRX2Ax3FAkimWg",
+  authDomain: "research-management-syst-37188.firebaseapp.com",
+  projectId: "research-management-syst-37188",
+}
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+async function loadProfile() {
+  const docRef = doc(db, "professors", id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    document.getElementById("profName").innerText = data.name;
+    document.getElementById("department").innerText = data.department;
+    document.getElementById("publications").innerText = data.publications;
+    document.getElementById("researchPapers").innerText = data.researchPapers;
+    document.getElementById("experience").innerText = data.experience;
+    document.getElementById("education").innerText = data.education;
+  } else {
+    document.body.innerHTML = "<h2>Professor not found</h2>";
+  }
+}
+
+loadProfile();
+</script>
+
+</body>
+</html>

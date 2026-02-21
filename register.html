@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Professor Register</title>
+  <style>
+    /* Added some basic styling for better visibility */
+    body { font-family: sans-serif; padding: 20px; }
+    form { display: flex; flex-direction: column; max-width: 300px; gap: 10px; }
+    input { padding: 8px; }
+    button { padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; }
+    button:hover { background-color: #0056b3; }
+    #message { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>Professor Registration</h2>
+
+  <form id="registerForm">
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <textarea id="publications"></textarea>
+    <textarea id="researchPapers"></textarea>
+    <button type="submit">Register</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script type="module">
+    // 1️⃣ Import Firebase Modules from CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+    // 2️⃣ Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2-HPP3PusL3Tu7q1UIxRX2Ax3FAkimWg",
+      authDomain: "research-management-syst-37188.firebaseapp.com",
+      projectId: "research-management-syst-37188",
+      storageBucket: "research-management-syst-37188.firebasestorage.app",
+      messagingSenderId: "416695212650",
+      appId: "1:416695212650:web:6c108eaf6ac67261680813"
+    };
+
+    // 3️⃣ Initialize Firebase (Do this ONLY once)
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 4️⃣ DOM Elements
+    const registerForm = document.getElementById("registerForm");
+    const message = document.getElementById("message");
+
+    // 5️⃣ Handle Registration
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      publications: document.getElementById("publications").value.split(",");
+      researchPapers: document.getElementById("researchPapers").value.split(",");
+      createdAt: new Date()
+
+      try {
+        message.innerText = "Creating account...";
+        message.style.color = "blue";
+
+        // A. Create Authentication User
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // B. Save Basic User Info (Role Management)
+        await setDoc(doc(db, "users", user.uid), {
+          name: name,
+          email: email,
+          role: "professor",
+          uid: user.uid,
+          createdAt: new Date()
+        });
+
+        // C. Create Professor Specific Profile
+        await setDoc(doc(db, "professors", user.uid), {
+          name: name,
+          department: "Not Assigned", // Default value
+          education: "",
+          experience: "",
+          publications: [],
+          researchPapers: [],
+          createdAt: new Date()
+        });
+
+        message.innerText = "Registration successful! Redirecting...";
+        message.style.color = "green";
+        
+        // Redirect after 1.5 seconds
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+
+      } catch (error) {
+        console.error("Error registering:", error);
+        
+        // Improve error readability
+        let errorMsg = error.message;
+        if(error.code === 'auth/email-already-in-use') {
+            errorMsg = "This email is already registered.";
+        } else if (error.code === 'auth/weak-password') {
+            errorMsg = "Password should be at least 6 characters.";
+        }
+
+        message.innerText = errorMsg;
+        message.style.color = "red";
+      }
+    });
+
+  </script>
+
+</body>
+</html> 

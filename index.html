@@ -11,10 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <script>
         tailwind.config = {
@@ -38,121 +37,23 @@
         .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .text-glow { text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
 
-        /* --- NEW MODERN FLOATING GALLERY STYLES --- */
-        
-        /* 1. Container & Scroll Logic */
-        .cinematic-gallery {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1.5rem;
-            padding: 4rem 2rem;
-            min-height: 500px;
-            overflow-x: visible; /* Allow hover to spill over */
-        }
+        /* --- GALLERY STYLES --- */
+        .cinematic-gallery { display: flex; align-items: center; justify-content: center; gap: 1.5rem; padding: 4rem 2rem; min-height: 500px; overflow-x: visible; }
+        .gallery-item { position: relative; width: 260px; height: 380px; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); filter: grayscale(20%) brightness(0.9); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+        @keyframes subtleFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        .cinematic-gallery:not(:hover) .gallery-item { animation: subtleFloat 6s ease-in-out infinite; }
+        .cinematic-gallery:hover .gallery-item { opacity: 0.4; filter: grayscale(80%) blur(1px); }
+        .cinematic-gallery .gallery-item:hover { opacity: 1; filter: grayscale(0%) brightness(1.1); transform: scale(1.25) translateY(-10px); z-index: 50; box-shadow: 0 30px 60px -10px rgba(37, 99, 235, 0.4); }
+        .cinematic-gallery .gallery-item:hover img { transform: scale(1.1); }
+        .cinematic-gallery .gallery-item:has(+ .gallery-item:hover) { transform: translateX(-15px) scale(0.95); }
+        .cinematic-gallery .gallery-item:hover + .gallery-item { transform: translateX(15px) scale(0.95); }
+        .gallery-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); transform: translateY(20px); opacity: 0; transition: all 0.4s ease; }
+        .gallery-item:hover .gallery-overlay { transform: translateY(0); opacity: 1; }
 
-        /* 2. The Card Item */
-        .gallery-item {
-            position: relative;
-            width: 260px;
-            height: 380px;
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smooth spring-like easing */
-            will-change: transform;
-            /* Default Styling */
-            filter: grayscale(20%) brightness(0.9);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        /* 3. The Image Inside */
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s ease;
-        }
-
-        /* 4. Floating Animation (Keyframes) */
-        @keyframes subtleFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-        }
-
-        /* Apply Float to NON-hovered items only (pauses on interaction) */
-        .cinematic-gallery:not(:hover) .gallery-item {
-            animation: subtleFloat 6s ease-in-out infinite;
-        }
-
-        /* 5. HOVER INTERACTIONS (The "Cinematic" Effect) */
-        
-        /* When hovering the container: dim all items slightly */
-        .cinematic-gallery:hover .gallery-item {
-            opacity: 0.4;
-            filter: grayscale(80%) blur(1px);
-        }
-
-        /* When hovering a SPECIFIC item: */
-        .cinematic-gallery .gallery-item:hover {
-            opacity: 1;
-            filter: grayscale(0%) brightness(1.1); /* Brighten active */
-            transform: scale(1.25) translateY(-10px); /* Scale Up & Lift */
-            z-index: 50; /* Bring to front */
-            box-shadow: 0 30px 60px -10px rgba(37, 99, 235, 0.4); /* Blue Glow */
-        }
-        
-        .cinematic-gallery .gallery-item:hover img {
-            transform: scale(1.1); /* Inner image subtle zoom */
-        }
-
-        /* 6. Neighbor Shift using :has() (Modern Browsers) */
-        /* Shift Left Sibling to the Left */
-        .cinematic-gallery .gallery-item:has(+ .gallery-item:hover) {
-            transform: translateX(-15px) scale(0.95);
-        }
-        
-        /* Shift Right Sibling to the Right */
-        .cinematic-gallery .gallery-item:hover + .gallery-item {
-            transform: translateX(15px) scale(0.95);
-        }
-
-        /* 7. Overlay Text */
-        .gallery-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
-        .gallery-item:hover .gallery-overlay {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 1023px) {
-            .cinematic-gallery {
-                justify-content: flex-start;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-                padding: 2rem;
-                gap: 1rem;
-            }
-            .cinematic-gallery::-webkit-scrollbar { display: none; }
-            
-            .gallery-item {
-                flex: 0 0 260px; /* Fixed width prevents shrinking */
-                scroll-snap-align: center;
-                animation: none !important; /* Disable float on mobile for performance */
-                transform: none !important;
-            }
-            
-            /* Disable complex hover effects on touch */
+            .cinematic-gallery { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2rem; gap: 1rem; }
+            .gallery-item { flex: 0 0 260px; scroll-snap-align: center; animation: none !important; transform: none !important; }
             .cinematic-gallery:hover .gallery-item { opacity: 1; filter: none; }
             .cinematic-gallery .gallery-item:hover { transform: none; }
             .gallery-overlay { opacity: 1; transform: translateY(0); }
@@ -169,41 +70,40 @@
             <div class="hidden md:block font-medium text-slate-300 tracking-wide">
                 Research Management System
             </div>
+            
+            <div class="flex items-center gap-3 md:gap-4">
+                <a href="login.html" class="text-slate-300 hover:text-white font-medium transition-colors duration-200 text-sm md:text-base px-2">
+                    Login
+                </a>
+                <a href="register.html" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium transition-all duration-200 shadow-lg shadow-blue-900/50 text-sm md:text-base ring-1 ring-white/10 hover:-translate-y-0.5">
+                    Register
+                </a>
+            </div>
+
         </div>
     </nav>
 
     <header class="relative h-screen w-full flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img 
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFqLO5urGZkSqxscTFdkPQYsBvNbls398LIw&s" 
-                alt="Campus Background" 
-                class="w-full h-full object-cover opacity-100 brightness-110 contrast-110 saturate-105"
-            >
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFqLO5urGZkSqxscTFdkPQYsBvNbls398LIw&s" alt="Campus Background" class="w-full h-full object-cover opacity-100 brightness-110 contrast-110 saturate-105">
             <div class="absolute inset-0 bg-slate-950/60 gradient-overlay"></div>
         </div>
 
         <div id="hero-search" class="relative z-10 w-full max-w-2xl px-4 opacity-0 translate-y-5">
             <div class="bg-slate-900/80 border border-slate-700 backdrop-blur-md rounded-full shadow-2xl p-2 flex items-center gap-3 ring-1 ring-white/10">
                 <div class="pl-4 text-slate-400"><i data-lucide="search" class="w-6 h-6"></i></div>
-                <input type="text" placeholder="Search professors, publications, research projects..." class="w-full bg-transparent border-none outline-none text-lg py-3 text-white placeholder:text-slate-500">
-                <button class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-medium transition-colors duration-200 shadow-lg shadow-blue-900/50">Search</button>
+                <input type="text" id="searchInput" placeholder="Search professors by name..." class="w-full bg-transparent border-none outline-none text-lg py-3 text-white placeholder:text-slate-500">
+                <button id="searchBtn" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-medium transition-colors duration-200 shadow-lg shadow-blue-900/50">Search</button>
             </div>
+            <p id="searchStatus" class="text-center mt-2 text-red-400 text-sm h-5"></p>
             <p class="text-slate-300 text-center mt-6 text-sm font-light tracking-wider">EXPLORE THE ACADEMIC EXCELLENCE</p>
         </div>
     </header>
 
     <aside class="fixed right-4 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-4">
-        <a href="https://youtube.com/@bvcoenewdelhi?si=dXQ1T0D_AG7mOLJ4" target="_blank" rel="noopener noreferrer"
-        class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-lg">
-            <i data-lucide="youtube" class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
-        </a>
-        <a href="https://www.linkedin.com/in/bharati-vidyapeeth-s-college-of-engineering-training-and-placement-department-5a5b2023a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" 
-        class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-lg" target="_blank" rel="noopener noreferrer">
-            <i data-lucide="linkedin" class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
-        </a>
-        <a href="https://x.com/bharati_vp" target="_blank" rel="noopener noreferrer" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-lg">
-            <i data-lucide="twitter" class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors"></i>
-        </a>
+        <a href="https://youtube.com/@bvcoenewdelhi" target="_blank" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 transition-all duration-300 shadow-lg"><i data-lucide="youtube" class="w-5 h-5 text-slate-400 group-hover:text-white"></i></a>
+        <a href="https://linkedin.com" target="_blank" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 transition-all duration-300 shadow-lg"><i data-lucide="linkedin" class="w-5 h-5 text-slate-400 group-hover:text-white"></i></a>
+        <a href="https://x.com/bharati_vp" target="_blank" class="group relative flex items-center justify-center w-12 h-12 rounded-full glass-card hover:bg-blue-600 transition-all duration-300 shadow-lg"><i data-lucide="twitter" class="w-5 h-5 text-slate-400 group-hover:text-white"></i></a>
     </aside>
 
     <section id="stats-section" class="py-24 bg-slate-950 relative border-b border-slate-900">
@@ -221,53 +121,16 @@
 
     <section class="py-24 bg-slate-900 relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-6 mb-4 text-center relative z-10">
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">Meet Our professors </h2>
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">Meet Our Professors</h2>
             <p class="text-slate-400 text-sm tracking-wide uppercase">Discover Innovation</p>
         </div>
-
         <div class="w-full overflow-hidden">
             <div class="cinematic-gallery">
-                
-                <div class="gallery-item" style="animation-delay: 0s;">
-                    <img src="images/img3.jpeg" >
-                    <div class="gallery-overlay">
-                        <p class="text-blue-400 text-xs font-bold uppercase">dept. </p>
-                        <h4 class="text-white font-medium text-lg">Applied Sciences</h4>
-                    </div>
-                </div>
-
-                <div class="gallery-item" style="animation-delay: 1.2s;">
-                    <img src="images/img4.jpeg" >
-                    <div class="gallery-overlay">
-                        <p class="text-blue-400 text-xs font-bold uppercase">dept.</p>
-                        <h4 class="text-white font-medium text-lg"> Information technology </h4>
-                    </div>
-                </div>
-
-                <div class="gallery-item" style="animation-delay: 2.5s;">
-                    <img src="images/img5.jpeg" >
-                    <div class="gallery-overlay">
-                        <p class="text-blue-400 text-xs font-bold uppercase">dept .</p>
-                        <h4 class="text-white font-medium text-lg"> Electronics n comm .</h4>
-                    </div>
-                </div>
-
-                <div class="gallery-item" style="animation-delay: 0.8s;">
-                    <img src="images/img6.jpeg" >
-                    <div class="gallery-overlay">
-                        <p class="text-blue-400 text-xs font-bold uppercase">  </p>
-                        <h4 class="text-white font-medium text-lg">HOD.s </h4>
-                    </div>
-                </div>
-
-                <div class="gallery-item" style="animation-delay: 2.0s;">
-                    <img src="images/img7.jpeg" >
-                    <div class="gallery-overlay">
-                        <p class="text-blue-400 text-xs font-bold uppercase"></p>
-                        <h4 class="text-white font-medium text-lg"> EVENTS </h4>
-                    </div>
-                </div>
-
+                <div class="gallery-item" style="animation-delay: 0s;"><img src="images/img3.jpeg"><div class="gallery-overlay"><h4 class="text-white font-medium text-lg">Applied Sciences</h4></div></div>
+                <div class="gallery-item" style="animation-delay: 1.2s;"><img src="images/img4.jpeg"><div class="gallery-overlay"><h4 class="text-white font-medium text-lg">Information Technology</h4></div></div>
+                <div class="gallery-item" style="animation-delay: 2.5s;"><img src="images/img5.jpeg"><div class="gallery-overlay"><h4 class="text-white font-medium text-lg">Electronics & Comm.</h4></div></div>
+                <div class="gallery-item" style="animation-delay: 0.8s;"><img src="images/img6.jpeg"><div class="gallery-overlay"><h4 class="text-white font-medium text-lg">HODs</h4></div></div>
+                <div class="gallery-item" style="animation-delay: 2.0s;"><img src="images/img7.jpeg"><div class="gallery-overlay"><h4 class="text-white font-medium text-lg">EVENTS</h4></div></div>
             </div>
         </div>
     </section>
@@ -293,13 +156,13 @@
     <section class="py-32 bg-slate-900 overflow-hidden border-t border-slate-900">
         <div class="max-w-7xl mx-auto px-6 space-y-24">
             <h2 class="text-center text-3xl font-bold text-white mb-16">Special Thanks</h2>
-            <div class="thanks-row flex flex-col md:flex-row items-center gap-12 justify-center opacity-0 -translate-x-12" id="thanks-row-1">
-                <div class="w-48 h-48 rounded-full overflow-hidden shadow-2xl shadow-blue-900/20 border-4 border-slate-800 flex-shrink-0"><img src="images/img8.png" class="w-full h-full object-cover"></div>
-                <div class="text-center md:text-left space-y-2"><h3 class="text-2xl font-bold text-white">Dr. yugnanda malhotra</h3><p class="text-blue-500 font-medium">Project Guide</p><p class="text-slate-400 text-sm max-w-xs">For technical expertise and structural architecture advice on the platform.</p></div>
-            </div>
             <div class="thanks-row flex flex-col md:flex-row-reverse items-center gap-12 justify-center opacity-0 translate-x-12" id="thanks-row-2">
                 <div class="w-48 h-48 rounded-full overflow-hidden shadow-2xl shadow-blue-900/20 border-4 border-slate-800 flex-shrink-0"><img src="images/img2.jpeg" class="w-full h-full object-cover"></div>
                 <div class="text-center md:text-right space-y-2"><h3 class="text-2xl font-bold text-white">Dr. Dharmender Saini</h3><p class="text-blue-500 font-medium">Project Patron</p><p class="text-slate-400 text-sm max-w-xs">For invaluable guidance and unwavering support throughout the research lifecycle.</p></div>
+            </div>
+            <div class="thanks-row flex flex-col md:flex-row items-center gap-12 justify-center opacity-0 -translate-x-12" id="thanks-row-1">
+                <div class="w-48 h-48 rounded-full overflow-hidden shadow-2xl shadow-blue-900/20 border-4 border-slate-800 flex-shrink-0"><img src="images/img8.png" class="w-full h-full object-cover"></div>
+                <div class="text-center md:text-left space-y-2"><h3 class="text-2xl font-bold text-white">Dr. Yugnanda Malhotra</h3><p class="text-blue-500 font-medium">Project Guide</p><p class="text-slate-400 text-sm max-w-xs">For technical expertise and structural architecture advice on the platform.</p></div>
             </div>
         </div>
     </section>
@@ -315,41 +178,100 @@
         </div>
     </footer>
 
-    <script>
+    <script type="module">
+        // 1. Initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA2-HPP3PusL3Tu7q1UIxRX2Ax3FAkimWg",
+            authDomain: "research-management-syst-37188.firebaseapp.com",
+            projectId: "research-management-syst-37188",
+            storageBucket: "research-management-syst-37188.firebasestorage.app",
+            messagingSenderId: "416695212650",
+            appId: "1:416695212650:web:6c108eaf6ac67261680813"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 2. Initialize UI (Icons & Animations)
         lucide.createIcons();
         gsap.registerPlugin(ScrollTrigger);
 
-        // Hero Search Animation
+        // Hero Search Fade In
         gsap.to("#hero-search", { y: 0, opacity: 1, duration: 1.2, ease: "power3.out", delay: 0.5 });
+        
+        // Floating Images Animation
+        gsap.to(".floating-image", { y: -20, rotation: 2, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        gsap.to(".floating-image-reverse", { y: 20, rotation: -2, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
-        // Stats Counter
+        // Stats Counter Logic
         const stats = document.querySelectorAll(".counter");
         stats.forEach(stat => {
             let target = +stat.getAttribute("data-target");
             ScrollTrigger.create({
                 trigger: "#stats-section",
-                start: "top 80%", 
+                start: "top 80%",
                 once: true,
                 onEnter: () => {
-                    gsap.to(stat, {
-                        innerText: target, duration: 2, snap: { innerText: 1 }, ease: "power2.out",
-                        onUpdate: function() { stat.innerText = Math.ceil(this.targets()[0].innerText); }
+                    let obj = { val: 0 };
+                    gsap.to(obj, {
+                        val: target, duration: 2, ease: "power2.out",
+                        onUpdate: () => { stat.innerText = Math.ceil(obj.val); }
                     });
                 }
             });
         });
 
-        // About Us Images
-        gsap.to(".floating-image", { y: -20, rotation: 2, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
-        gsap.to(".floating-image-reverse", { y: 20, rotation: -2, duration: 3.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
-
-        // Thanks Section
+        // Thanks Section Animation
         gsap.to("#thanks-row-1", { scrollTrigger: { trigger: "#thanks-row-1", start: "top 85%", toggleActions: "play none none reverse" }, x: 0, opacity: 1, duration: 1, ease: "power3.out" });
         gsap.to("#thanks-row-2", { scrollTrigger: { trigger: "#thanks-row-2", start: "top 85%", toggleActions: "play none none reverse" }, x: 0, opacity: 1, duration: 1, ease: "power3.out" });
-    </script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-    lucide.createIcons({ force: true });
+
+        // 3. Search Logic
+        const searchBtn = document.getElementById("searchBtn");
+        const searchInput = document.getElementById("searchInput");
+        const searchStatus = document.getElementById("searchStatus");
+
+        async function performSearch() {
+            const term = searchInput.value.trim(); 
+
+            if (!term) {
+                searchStatus.innerText = "Please enter a name.";
+                return;
+            }
+
+            searchBtn.innerText = "Searching...";
+            searchStatus.innerText = "";
+
+            try {
+                const q = query(
+                    collection(db, "professors"),
+                    where("name", "==", term)
+                );
+
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    searchStatus.innerText = "No professor found with that exact name.";
+                    searchBtn.innerText = "Search";
+                } else {
+                    snapshot.forEach(doc => {
+                        window.location.href = `profile.html?id=${doc.id}`;
+                    });
+                }
+            } catch (error) {
+                console.error("Search Error:", error);
+                searchStatus.innerText = "Error searching. Check console.";
+                searchBtn.innerText = "Search";
+            }
+        }
+
+        searchBtn.addEventListener("click", performSearch);
+        
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") performSearch();
+        });
     </script>
 </body>
 </html>
